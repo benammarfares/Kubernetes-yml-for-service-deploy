@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: assurance-policy
+spec:
+  ports:
+    - targetPort: 8060
+      port: 80
+  selector:
+    app: assurance-policy
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: assurance-policy
+spec:
+  selector:
+    matchLabels:
+      app: assurance-policy
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: assurance-policy
+    spec:
+      containers:
+        - name: assurance
+          image: fares121/assurancepolicy-service:1.0.0
+          imagePullPolicy: Always      
+          ports:
+            - containerPort: 8060
+          env:   # Setting Enviornmental Variables
+            - name: DB_HOST   # Setting Database host address from configMap
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-conf  # name of configMap
+                  key: host
+            - name: DB_NAME  # Setting Database name from configMap
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-conf
+                  key: name
+            - name: POSTGRES_USER  # Setting Database username from Secret
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials # Secret Name
+                  key: postgres_user
+            - name: POSTGRES_PASSWORD # Setting Database password from Secret
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: postgres_password
