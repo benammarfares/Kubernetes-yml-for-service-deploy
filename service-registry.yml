@@ -67,3 +67,4 @@ spec:
   ports:
     - port: 80
       targetPort: 8761
+      nodePort: 31744
